@@ -1,45 +1,49 @@
+getDiff(prev, curr) {
+  var result = onp(prev, curr);
+  var diff = formatDiff(prev, curr, result);
+  return diff;
+}
+
 formatDiff(prev, curr, result) {
         var index = [0, 0]; // [prev, curr]
-        var string = "distance: " + result[0].toString() + "<br>" + "\n";
-
+        var string = "";
         for (var i = 0; i < result[1].length; i++) {
             if (index[1] < result[1][i][1]) {
-                string += ' +';
+                string += '@|sprite|@+';
                 while (index[1] < result[1][i][1]) {
                     string += curr[index[1]];
                     index[1]++;
                 }
-                string += ' ';
+                string += '@|sprite|@';
             }
             if (index[0] < result[1][i][0]) {
-                string += ' -';
+                string += '@|sprite|@-';
                 while (index[0] < result[1][i][0]) {
                     string += prev[index[0]];
                     index[0]++;
                 }
-                string += ' ';
+                string += '@|sprite|@';
             }
             string += prev[result[1][i][0]];
             index[0]++;
             index[1]++;
         }
         if (index[1] < curr.length) {
-            string += ' +';
+            string += '@|sprite|@+';
             while (index[1] < curr.length) {
                 string += curr[index[1]];
                 index[1]++;
             }
-            string += ' ';
+            string += '@|sprite|@';
         }
         if (index[0] < prev.length) {
-            string += ' -';
+            string += '@|sprite|@-';
             while (index[0] < prev.length) {
                 string += prev[index[0]];
                 index[0]++;
             }
-            string += ' ';
+            string += '@|sprite|@';
         }
-        print(string);
         return string;
     }
 

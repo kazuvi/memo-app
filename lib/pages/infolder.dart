@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:intl/intl.dart';
-import 'package:writerapp/pages/home.dart';
-import 'package:writerapp/pages/db.dart';
+import 'package:writerapp/pages/file_db.dart';
 
 import 'package:async/async.dart';
+import 'package:writerapp/pages/home.dart';
+import 'package:writerapp/pages/diff_db.dart';
+import 'package:writerapp/pages/pageview.dart';
 
 
 class Infolder extends StatefulWidget {
@@ -43,7 +45,6 @@ class _InfolderState extends State<Infolder> {
         var result = await Navigator.pushNamed(this.context, "/editor",arguments: FileArguments(file.title, file.id, file.folderId, file.content));
         file.content = result as String;
         setState(() {});
-
       },
     child: Container(
 
@@ -56,31 +57,35 @@ class _InfolderState extends State<Infolder> {
         // ),
 
         child: ListTile(
-        title: Text(
-        file.title,
-        style: TextStyle(
-          fontStyle: file.isDone ? FontStyle.italic : null,
-          color: file.isDone ? Colors.grey : null,
-          decoration: file.isDone ? TextDecoration.lineThrough : null
+          title: Text(
+            file.title,
+            style: TextStyle(
+              fontStyle: file.isDone ? FontStyle.italic : null,
+              color: file.isDone ? Colors.grey : null,
+              decoration: file.isDone ? TextDecoration.lineThrough : null
+            ),
+          ),
+          subtitle: RichText(
+            overflow: TextOverflow.ellipsis,
+            strutStyle: StrutStyle(fontSize: 10.0),
+            text: TextSpan(
+              style: TextStyle(color: Colors.black.withOpacity(0.5)),
+              text: 'prev: ${file.content.replaceAll('\n', '')}'
+            ),
+          ),
+          trailing: IconButton(
+            icon: const Icon(Icons.more_horiz),
+            // onPressed: () async {
+            //   await db.deleteFileItem(file);
+            //   _updateUI(file.folderId);
+            // }
+                onPressed: ()async {
+                  Navigator.pushNamed(this.context, "/view",arguments: FileArguments(file.title, file.id, file.folderId, file.content));
+                    },
+
+          ),
         ),
-      ),
-      subtitle: RichText(
-        overflow: TextOverflow.ellipsis,
-        strutStyle: StrutStyle(fontSize: 10.0),
-        text: TextSpan(
-          style: TextStyle(color: Colors.black.withOpacity(0.5)),
-          text: 'prev: ${file.content.replaceAll('\n', '')}'
-        ),
-      ),
-      trailing: IconButton(
-        icon: const Icon(Icons.more_horiz),
-        onPressed: () async {
-          await db.deleteFileItem(file);
-          _updateUI(file.folderId);
-        }
-      ),
-    ),
-    )
+      )
     )
   );
 
@@ -106,8 +111,12 @@ class _InfolderState extends State<Infolder> {
             ),
             IconButton(
               icon: const Icon(Icons.search),
-              onPressed: () =>
-                  Fluttertoast.showToast(msg: 'Dummy search action.'),
+              onPressed: () async {
+                var diffdb = new DiffmakeDB();
+                await diffdb.initDb();
+                await diffdb.commit(1,1,"testcontent");
+                Navigator.pushNamed(context, "/diffview");
+              },
             ),
             IconButton(
               icon: const Icon(Icons.more_vert),
@@ -154,7 +163,7 @@ class _InfolderState extends State<Infolder> {
                   MainFile(
                   folderId: getfolderId.folderId,
                   title: "テストです",
-                  content: "ここには本文が入ります。\n改行しました。",
+                  content: "",
                   createdAt: DateTime.now(),
                   updateAt: DateTime.now(),
                   ),

@@ -1,20 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:writerapp/pages/file_db.dart';
 
 class ContentSliverList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (BuildContext context, int index) {
-          if (index % 2 == 0) {
-            return Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-            );
-          } else {
-            return _buildHorizontalPageView(context, 4);
-          }
-        },
-        childCount: 2,
+    final fileData = ModalRoute.of(context)!.settings.arguments as FileArguments;
+      return Container(
+            child: Scaffold(
+                // appBar: PreferredSize(
+                //   // backgroundColor: Colors.black.withOpacity(0.7),
+                //   preferredSize: Size.fromHeight(40.0),
+                //   child: AppBar(
+                //     title: Text(fileData.title),
+                //   ),
+                // ),
+                body:
+                  CustomScrollView(
+                  slivers: [SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
+                        if (index % 2 == 0) {
+                          return Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                          );
+                        } else {
+                          return _buildHorizontalPageView(context, 55);
+                        }
+                      },
+                      childCount: 2,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -41,16 +58,35 @@ class ContentSliverList extends StatelessWidget {
   }
 
   Widget _buildHorizontalItem(
-      BuildContext context, int carouselIndex, int itemIndex) {
+    BuildContext context, int carouselIndex, int itemIndex) {
+    final fileData = ModalRoute.of(context)!.settings.arguments as FileArguments;
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
       child: Column(
         children: <Widget>[
           Container(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  fileData.title,
+                  textAlign: TextAlign.left,
+                  // overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontWeight: FontWeight.w200, color: Colors.white, height: 2, fontSize: 24),
+                ),
+                Text(
+                  fileData.content,
+                  // textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontWeight: FontWeight.w100, color: Colors.white, height: 2, fontSize: 14),
+                ),
+              ]
+            ),
             height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
-              color: Colors.grey,
-              borderRadius: BorderRadius.all(Radius.circular(5.0)),
+            color: Colors.grey,
+            borderRadius: BorderRadius.all(Radius.circular(5.0)),
             ),
           )
         ],

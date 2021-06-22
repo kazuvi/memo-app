@@ -8,8 +8,6 @@ import 'dart:io';
 
 import 'package:intl/intl.dart';
 
-import 'package:writerapp/pages/pageview.dart';
-
 
 
 class Folder {

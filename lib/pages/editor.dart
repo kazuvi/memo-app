@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:writerapp/pages/db.dart';
+import 'package:writerapp/pages/file_db.dart';
 
 import 'package:async/async.dart';
 
@@ -11,6 +11,7 @@ class Edit extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final getfile= ModalRoute.of(context)!.settings.arguments as FileArguments;
+    print(getfile.content.replaceAll('\n', ''));
     return WillPopScope(
       onWillPop: (){
       Navigator.pop(context, getfile.content);
@@ -63,7 +64,7 @@ class RuledLineTextField extends StatelessWidget {
     });
     return true;
   }
-  
+
   asyncInit();
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(horizontal: 20),

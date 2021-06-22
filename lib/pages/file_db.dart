@@ -127,5 +127,4 @@ class InfolderDb {
       /*args=*/ [content, id],
     );
   }
-
 }
