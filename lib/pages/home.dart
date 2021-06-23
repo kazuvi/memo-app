@@ -116,17 +116,6 @@ class _HomeState extends State<Home> {
     );
   }
 
-  // Updates records in the db table.
-  Future<void> _toggleTodoItem(Folder todo) async {
-    await this._db.rawUpdate(
-      /*sql=*/ '''
-      UPDATE $kDbTableName
-      SET isDone = ?
-      WHERE id = ?''',
-      /*args=*/ [if (todo.isDone) 0 else 1, todo.id],
-    );
-  }
-
   // Deletes records in the db table.
   Future<void> _deleteFolderItem(Folder folder) async {
     await this._db.rawDelete('''
@@ -159,13 +148,13 @@ class _HomeState extends State<Home> {
     child: Container(
 
       // image banner
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: folder.id == 1 ? AssetImage("assets/500.png") :  AssetImage("assets/kurage.png"),
-            fit: BoxFit.fitWidth,
-            alignment: Alignment.topCenter,
-          ),
-        ),
+        // decoration: BoxDecoration(
+        //   image: DecorationImage(
+        //     image: folder.id == 1 ? AssetImage("assets/500.png") :  AssetImage("assets/kurage.png"),
+        //     fit: BoxFit.fitWidth,
+        //     alignment: Alignment.topCenter,
+        //   ),
+        // ),
 
         child: ListTile(
         title: Text(

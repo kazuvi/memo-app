@@ -9,18 +9,26 @@ var list = [
 class DiffViewer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final diff = ModalRoute.of(context)!.settings.arguments as String;
+    List<String> sprr = diff.split("@|sprite|@");
+    if (sprr[0] == "") {
+      sprr.removeAt(0);
+    }
+    if (sprr[sprr.length - 1] == "") {
+      sprr.removeAt(sprr.length - 1);
+    }
+
         return SafeArea(
         child: Container(
             child: Scaffold(
-              appBar: PreferredSize(
-                  // backgroundColor: Colors.black.withOpacity(0.7),
-                  preferredSize: Size.fromHeight(40.0),
-                  child: AppBar(
-                  ),
+            appBar: PreferredSize(
+                // backgroundColor: Colors.black.withOpacity(0.7),
+                preferredSize: Size.fromHeight(40.0),
+                child: AppBar(
                 ),
-                body: getTextWidgets(list)
-
-            ),
+              ),
+              body: getTextWidgets(sprr)
+          ),
         )
       );
   }

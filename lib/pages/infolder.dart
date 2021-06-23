@@ -7,7 +7,6 @@ import 'package:writerapp/pages/file_db.dart';
 import 'package:async/async.dart';
 import 'package:writerapp/pages/home.dart';
 import 'package:writerapp/pages/diff_db.dart';
-import 'package:writerapp/pages/pageview.dart';
 
 
 class Infolder extends StatefulWidget {
@@ -114,8 +113,19 @@ class _InfolderState extends State<Infolder> {
               onPressed: () async {
                 var diffdb = new DiffmakeDB();
                 await diffdb.initDb();
-                await diffdb.commit(1,1,"testcontent");
-                Navigator.pushNamed(context, "/diffview");
+                await diffdb.commit(1, 1, "これはテデフツチオオオです");
+                // await diffdb.addFileItem(
+                //   DiffFile(
+                //     folderId: 1,
+                //     folderFileId: "1-1",
+                //     title: "test",
+                //     content: "これはテストです",
+                //     diff: await diffdb.commit(1, 1, "これはテストです"),
+                //     createdAt: DateTime.now()
+
+                //   )
+                // );
+                Navigator.pushNamed(context, "/diffview", arguments: await diffdb.commit(1, 1, "これはテデフツチオオオです"));
               },
             ),
             IconButton(
@@ -146,7 +156,7 @@ class _InfolderState extends State<Infolder> {
           child: Scaffold(
             appBar: PreferredSize(
               // backgroundColor: Colors.black.withOpacity(0.7),
-              preferredSize: Size.fromHeight(40.0),
+              preferredSize: Size.fromHeight(50.0),
               child: AppBar(
                 title: Text(getfolderId.title),
                 centerTitle: true,
