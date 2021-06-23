@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:intl/intl.dart';
-import 'package:writerapp/pages/file_db.dart';
+import 'package:writerapp/db/file_db.dart';
 
 import 'package:async/async.dart';
-import 'package:writerapp/pages/home.dart';
-import 'package:writerapp/pages/diff_db.dart';
+import 'package:writerapp/db/folder_db.dart';
+import 'package:writerapp/db/diff_db.dart';
 
 
 class Infolder extends StatefulWidget {

@@ -15,32 +15,29 @@ class DiffFile {
   final DateTime createdAt;
 
   DiffFile({this.id, this.folderId, this.folderFileId = "", this.title = "", this.content ="", this.diff = "", required this.createdAt});
-
-  DiffFile.fromJsonMap(Map<String, dynamic> map)
-      : id = map['id'] as int,
-        folderId = map['folderId'] as int,
-        folderFileId = map['folderFileId'] as String,
-        title = map['title'] as String,
-        content = map['content'] as String,
-        diff = map['diff'] as String,
-        createdAt =
-          DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int);
-
+  DiffFile.fromJsonMap(Map<String, dynamic> map):
+    id = map['id'] as int,
+    folderId = map['folderId'] as int,
+    folderFileId = map['folderFileId'] as String,
+    title = map['title'] as String,
+    content = map['content'] as String,
+    diff = map['diff'] as String,
+    createdAt =
+    DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int);
   Map<String, dynamic> toJsonMap() => {
-        'id': id,
-        'folderId': folderId,
-        'folderFileId': folderFileId,
-        'title': title,
-        'content': content,
-        'diff': diff,
-        'createdAt': createdAt.millisecondsSinceEpoch,
-      };
+    'id': id,
+    'folderId': folderId,
+    'folderFileId': folderFileId,
+    'title': title,
+    'content': content,
+    'diff': diff,
+    'createdAt': createdAt.millisecondsSinceEpoch,
+  };
 }
 
 class DiffmakeDB {
   static const kDbFileName = 'diff.db';
   static const kDbTableName = 'diff_tbl';
-
   late Database _db;
   List<DiffFile> files = [];
 
@@ -68,14 +65,12 @@ class DiffmakeDB {
       },
     );
   }
-
   Future<List> getFileItems(int? id) async {
     final List<Map<String, dynamic>> jsons =
     await this._db.rawQuery('SELECT * FROM $kDbTableName WHERE folderId=?',[id]);
     files = jsons.map((json) => DiffFile.fromJsonMap(json)).toList();
     return files;
   }
-
   Future<List>  getPrevFiles(int? folderid, int? fileid) async {
     String strfolderid = folderid.toString();
     String strfileid = fileid.toString();
@@ -85,7 +80,6 @@ class DiffmakeDB {
     files = jsons.map((json) => DiffFile.fromJsonMap(json)).toList();
     return files;
   }
-
   Future<String> commit(int? folderId, int? fileid, String currContent) async {
     String prevContent;
     await this.getPrevFiles(folderId, fileid);
@@ -94,7 +88,6 @@ class DiffmakeDB {
     }else {
       prevContent = this.files[0].content;
     }
-
     String rr = getDiff(prevContent, currContent).replaceAll('@|sprite|@@|sprite|@', '@|sprite|@');
 
     List<String> sprr = rr.split("@|sprite|@");
