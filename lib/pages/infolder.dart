@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:intl/intl.dart';
-import 'package:writerapp/db/file_db.dart';
-
 import 'package:async/async.dart';
-import 'package:writerapp/db/folder_db.dart';
-import 'package:writerapp/db/diff_db.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
+import 'package:writerapp/db/folder_db.dart';
+import 'package:writerapp/db/file_db.dart';
+import 'package:writerapp/db/diff_db.dart';
 
 class Infolder extends StatefulWidget {
   final int? folderId;
@@ -18,10 +17,9 @@ class Infolder extends StatefulWidget {
 
 class _InfolderState extends State<Infolder> {
   List<MainFile> _files = [];
-
   final db = new InfolderDb();
-
   final AsyncMemoizer _memoizer = AsyncMemoizer();
+  DateFormat outputFormat = DateFormat('yyyy-MM-dd HH:mm');
 
   Future<bool> asyncInit(int? getid) async {
     await _memoizer.runOnce(() async {
@@ -35,8 +33,6 @@ class _InfolderState extends State<Infolder> {
     this._files = await db.getFileItems(id) as List<MainFile>;
     setState(() {});
   }
-
-  DateFormat outputFormat = DateFormat('yyyy-MM-dd HH:mm');
 
   Card _itemToListTile(MainFile file) => Card(
     child : InkWell(
@@ -81,7 +77,6 @@ class _InfolderState extends State<Infolder> {
                 onPressed: ()async {
                   Navigator.pushNamed(this.context, "/view",arguments: FileArguments(file.title, file.id, file.folderId, file.content));
                     },
-
           ),
         ),
       )
@@ -122,7 +117,6 @@ class _InfolderState extends State<Infolder> {
                 //     content: "これはテストです",
                 //     diff: await diffdb.commit(1, 1, "これはテストです"),
                 //     createdAt: DateTime.now()
-
                 //   )
                 // );
                 Navigator.pushNamed(context, "/diffview", arguments: await diffdb.commit(1, 1, "これはテデフツチオオオです"));
@@ -169,17 +163,55 @@ class _InfolderState extends State<Infolder> {
             ),
             floatingActionButton: FloatingActionButton(
               onPressed: () async {
-                await db.addFileItem(
-                  MainFile(
-                  folderId: getfolderId.folderId,
-                  title: "テストです",
-                  content: "",
-                  createdAt: DateTime.now(),
-                  updateAt: DateTime.now(),
-                  ),
-                );
-              _updateUI(getfolderId.folderId);
-              },
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          String title = "";
+                          String tags = "";
+                          return AlertDialog(
+                            title: Text('新規作成'),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                TextField(
+                                  autofocus: true,
+                                  decoration: new InputDecoration(
+                                    labelText: 'タイトル'
+                                  ),
+                                  onChanged: (value) {
+                                    title = value;
+                                  },
+                                ),
+                              ]
+                            ),
+                            actions: <Widget>[
+                              TextButton(
+                                child: Text("Cancel"),
+                                onPressed: () => Navigator.of(context).pop(title),
+                              ),
+                              TextButton(
+                                child: Text('Ok'),
+                                onPressed: () async {
+                                  await db.addFileItem(
+                                    MainFile(
+                                      folderId: getfolderId.folderId,
+                                      title: title,
+                                      content: "",
+                                      createdAt: DateTime.now(),
+                                      updateAt: DateTime.now(),
+                                    ),
+                                  );
+                                Navigator.of(context).pop(title);
+                                  await Navigator.pushNamed(this.context, "/editor",arguments: FileArguments(title, await db.getNowCreateId(), getfolderId.folderId, ""));
+                                  _updateUI(getfolderId.folderId);
+                                  setState(() {});
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
               child: const Icon(Icons.add),
             ),
             floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,

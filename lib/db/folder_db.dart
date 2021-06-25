@@ -2,6 +2,8 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'dart:io';
+import 'package:writerapp/db/file_db.dart';
+// import 'package:writerapp/db/diff_db.dart';
 
 class Folder {
   final int? id;
@@ -73,15 +75,21 @@ class FolderDb {
   }
 
   // Retrieves rows from the db table.
-  Future<void> getFolderItems() async {
+  Future<List> getFolderItems() async {
     final List<Map<String, dynamic>> jsons =
     await this._db.rawQuery('SELECT * FROM $kDbTableName');
-    this.folders = jsons.map((json) => Folder.fromJsonMap(json)).toList();
+    folders = jsons.map((json) => Folder.fromJsonMap(json)).toList();
+    return folders;
   }
 
-  // Inserts records to the db table.
-  // Note we don't need to explicitly set the primary key (id), it'll auto
-  // increment.
+    Future<int?> getNowCreateId() async {
+    int? id;
+    final List<Map<String, dynamic>> jsons =
+    await this._db.rawQuery('SELECT * FROM $kDbTableName ORDER BY createdAt DESC LIMIT 1');
+    id = jsons.map((json) => Folder.fromJsonMap(json)).toList()[0].id;
+    return id;
+  }
+
   Future<void> addFolderItem(Folder folder) async {
     await this._db.transaction(
       (Transaction txn) async {
@@ -106,6 +114,18 @@ class FolderDb {
       DELETE FROM $kDbTableName
       WHERE id = ${folder.id}
       ''');
+    final filedb = new InfolderDb();
+    await filedb.initDb();
+    filedb.deleteAllFile(folder);
   }
 
+    Future<void> updateUpdateAt(int? folderId) async {
+    await this._db.rawUpdate(
+      /*sql=*/ '''
+      UPDATE $kDbTableName
+      SET updateAt = ?
+      WHERE id = ?''',
+      /*args=*/ [DateTime.now().millisecondsSinceEpoch, folderId],
+    );
+  }
 }

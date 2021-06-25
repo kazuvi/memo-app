@@ -1,11 +1,5 @@
 import 'package:flutter/material.dart';
 
-var list = [
-  "私が何を言っているのか分かっているのか",
-  "+もう彼には何も聞こえない",
-  "-彼は何も聞こうとしない",
-  "その衝動が彼を襲う"];
-
 class DiffViewer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

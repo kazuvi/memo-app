@@ -3,6 +3,8 @@ import 'package:sqflite/sqflite.dart';
 
 import 'dart:io';
 
+import 'package:writerapp/db/folder_db.dart';
+
 class MainFile {
   final int? id;
   final int? folderId;
@@ -44,8 +46,6 @@ class FileArguments {
 
   FileArguments(this.title, this.id, this.folderId, this.content);
 }
-
-
 
 class InfolderDb {
   static const kDbFileName = 'protofile.db';
@@ -89,6 +89,15 @@ class InfolderDb {
   }
 
 
+    Future<int?> getNowCreateId() async {
+    int? id;
+    final List<Map<String, dynamic>> jsons =
+    await this._db.rawQuery('SELECT * FROM $kDbTableName ORDER BY createdAt desc LIMIT 1');
+    id = jsons.map((json) => MainFile.fromJsonMap(json)).toList()[0].id;
+    return id;
+  }
+
+
 
   Future<void> addFileItem(MainFile file) async {
     await this._db.transaction(
@@ -117,7 +126,14 @@ class InfolderDb {
       ''');
   }
 
-  Future<void> updateContent(String content, int? id) async {
+    Future<void> deleteAllFile(Folder folder) async {
+    await this._db.rawDelete('''
+        DELETE FROM $kDbTableName
+        WHERE folderId = ${folder.id}
+      ''');
+  }
+
+  Future<void> updateContent(String content, int? id, int? folderId) async {
     await this._db.rawUpdate(
       /*sql=*/ '''
       UPDATE $kDbTableName
@@ -125,5 +141,8 @@ class InfolderDb {
       WHERE id = ?''',
       /*args=*/ [content, id],
     );
+    final folderdb = new FolderDb();
+    await folderdb.initDb();
+    folderdb.updateUpdateAt(folderId);
   }
 }

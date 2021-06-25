@@ -60,7 +60,7 @@ class ContentSliverList extends StatelessWidget {
   Widget _buildHorizontalItem(
     BuildContext context, int carouselIndex, int itemIndex) {
     final fileData = ModalRoute.of(context)!.settings.arguments as FileArguments;
-    return Padding(
+    return SafeArea(child: Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
       child: Column(
         children: <Widget>[
@@ -82,7 +82,7 @@ class ContentSliverList extends StatelessWidget {
                 ),
               ]
             ),
-            height: MediaQuery.of(context).size.height,
+            height: MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top,
             width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
             color: Colors.grey,
@@ -91,6 +91,7 @@ class ContentSliverList extends StatelessWidget {
           )
         ],
       ),
+    )
     );
   }
 }

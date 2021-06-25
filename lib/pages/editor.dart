@@ -4,87 +4,84 @@ import 'package:writerapp/db/file_db.dart';
 import 'package:async/async.dart';
 
 
-
 final globalKeyGetTextField = GlobalKey();
 
 class Edit extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final getfile= ModalRoute.of(context)!.settings.arguments as FileArguments;
-    print(getfile.content.replaceAll('\n', ''));
+    final db = new InfolderDb();
+    final AsyncMemoizer _memoizer = AsyncMemoizer();
+    var onScreen = true;
+
+    Future<bool> asyncInit() async {
+      await _memoizer.runOnce(() async {
+        await db.initDb();
+      });
+      return true;
+    }
+
+    timer(db) async {
+      while (onScreen == true) {
+      await Future.delayed(Duration(seconds: 1));
+      db.updateContent(getfile.content, getfile.id, getfile.folderId);
+      }
+    }
+
+    timer(db);
+    asyncInit();
+
     return WillPopScope(
-      onWillPop: (){
+      onWillPop: () {
       Navigator.pop(context, getfile.content);
+      onScreen = false;
       return Future.value(false);
     },
-      child:
-    Container(
+      child: Container(
       decoration: BoxDecoration(
         image: DecorationImage(
           image: AssetImage('assets/test.png'),
           fit: BoxFit.cover,
         ),
       ),
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(getfile.title),
-        ),
-        body: RuledLineTextField(),
-        backgroundColor: Colors.white.withOpacity(0.8),
-        floatingActionButton: FloatingActionButton(
-            child: const Icon(Icons.toll_rounded),
-            onPressed: () => showModalBottomSheet(
-                context: context,
-                builder: (BuildContext context) => Container(
-                  alignment: Alignment.center,
-                  height: 200,
-                  child: const Text('Dummy bottom sheet'),
-                ),
-              ),
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(getfile.title),
           ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      ),
-    )
-    ,
-    );
-  }
-}
-
-class RuledLineTextField extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-
-  var getfile= ModalRoute.of(context)!.settings.arguments as FileArguments;
-  final db = new InfolderDb();
-  final AsyncMemoizer _memoizer = AsyncMemoizer();
-
-  Future<bool> asyncInit() async {
-    await _memoizer.runOnce(() async {
-      await db.initDb();
-    });
-    return true;
-  }
-
-  asyncInit();
-    return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: 20),
-      child: Stack(
-        children: <Widget>[
-          CustomPaint(
-            painter: TextUnderLinePainter(),
-          ),
-          TextField(
-            key: globalKeyGetTextField,
-            keyboardType: TextInputType.multiline,
-            maxLines: 10000,
-            decoration: const InputDecoration(border: InputBorder.none),
-            controller: TextEditingController(text: getfile.content),
-            onChanged: (text) {
+          body: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(horizontal: 20),
+        child: Stack(
+          children: <Widget>[
+            // CustomPaint(
+            //   painter: TextUnderLinePainter(),
+            // ),
+            TextField(
+              key: globalKeyGetTextField,
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
+              decoration: const InputDecoration(border: InputBorder.none),
+              controller: TextEditingController(text: getfile.content),
+              onChanged: (text) {
                 getfile.content = text;
-                db.updateContent(getfile.content, getfile.id);
-                  },
-          ),
-        ],
+              },
+            ),
+          ],
+        ),
+      ),
+          backgroundColor: Colors.white.withOpacity(0.8),
+          floatingActionButton: FloatingActionButton(
+              child: const Icon(Icons.toll_rounded),
+              onPressed: () => showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) => Container(
+                    alignment: Alignment.center,
+                    height: 200,
+                    child: const Text('Dummy bottom sheet'),
+                  ),
+                ),
+            ),
+            floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+        ),
       ),
     );
   }

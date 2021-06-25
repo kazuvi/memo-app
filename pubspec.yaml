@@ -59,7 +59,7 @@ flutter:
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/icon.png"
+  image_path: "assets/nene.png"
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
