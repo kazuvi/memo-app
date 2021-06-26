@@ -36,7 +36,7 @@ class DiffFile {
 }
 
 class DiffmakeDB {
-  static const kDbFileName = 'diff.db';
+  static const kDbFileName = 'diff_demo.db';
   static const kDbTableName = 'diff_tbl';
   late Database _db;
   List<DiffFile> files = [];

@@ -49,13 +49,8 @@ class _HomeState extends State<Home> {
           // ),
           child: ListTile(
             title: Text(
-            folder.title,
-            style: TextStyle(
-              fontStyle: folder.isDone ? FontStyle.italic : null,
-              color: folder.isDone ? Colors.grey : null,
-              decoration: folder.isDone ? TextDecoration.lineThrough : null
+              folder.title,
             ),
-          ),
           subtitle: Text(folder.tags == "" ? '\n最終更新日: ${outputFormat.format(folder.updateAt)}':'Tag: ${folder.tags}\n最終更新日: ${outputFormat.format(folder.updateAt)}'),
           isThreeLine: true,
           trailing:

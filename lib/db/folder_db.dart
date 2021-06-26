@@ -9,18 +9,16 @@ class Folder {
   final int? id;
   String title;
   String tags;
-  final bool isDone;
   final DateTime createdAt;
   final DateTime updateAt;
 
 
-  Folder({this.id, this.title = "", this.tags ="", this.isDone = false, required this.createdAt, required this.updateAt});
+  Folder({this.id, this.title = "", this.tags ="",  required this.createdAt, required this.updateAt});
 
   Folder.fromJsonMap(Map<String, dynamic> map)
       : id = map['id'] as int,
         title = map['title'] as String,
         tags = map['tags'] as String,
-        isDone = map['isDone'] == 1,
         createdAt =
           DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int),
         updateAt =
@@ -30,7 +28,6 @@ class Folder {
         'id': id,
         'title': title,
         'tags': tags,
-        'isDone': isDone ? 1 : 0,
         'createdAt': createdAt.millisecondsSinceEpoch,
         'updateAt': updateAt.millisecondsSinceEpoch,
       };
@@ -44,7 +41,7 @@ class FolderArguments {
 }
 
 class FolderDb {
-  static const kDbFileName = 'proto.db';
+  static const kDbFileName = 'folder_demo.db';
   static const kDbTableName = 'folder_tbl';
 
   late Database _db;
@@ -64,7 +61,6 @@ class FolderDb {
         await db.execute('''
         CREATE TABLE $kDbTableName(
           id INTEGER PRIMARY KEY,
-          isDone BIT NOT NULL,
           title TEXT,
           tags TEXT,
           createdAt INT,
@@ -94,12 +90,11 @@ class FolderDb {
       (Transaction txn) async {
         await txn.rawInsert('''
           INSERT INTO $kDbTableName
-            (title, tags, isDone, createdAt, updateAt)
+            (title, tags,  createdAt, updateAt)
           VALUES
             (
               "${folder.title}",
               "${folder.tags}",
-              ${folder.isDone ? 1 : 0},
               ${folder.createdAt.millisecondsSinceEpoch},
               ${folder.updateAt.millisecondsSinceEpoch}
             )''');

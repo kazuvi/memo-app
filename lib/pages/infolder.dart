@@ -54,19 +54,8 @@ class _InfolderState extends State<Infolder> {
         child: ListTile(
           title: Text(
             file.title,
-            style: TextStyle(
-              fontStyle: file.isDone ? FontStyle.italic : null,
-              color: file.isDone ? Colors.grey : null,
-              decoration: file.isDone ? TextDecoration.lineThrough : null
-            ),
           ),
-          subtitle: RichText(
-            overflow: TextOverflow.ellipsis,
-            strutStyle: StrutStyle(fontSize: 10.0),
-            text: TextSpan(
-              text: 'prev: ${file.content.replaceAll('\n', '')}'
-            ),
-          ),
+          subtitle: Text('${file.content.length}字\n${file.content.replaceAll('\n', '')}'),
           trailing:
           IconButton(
             icon: const Icon(Icons.more_horiz),
