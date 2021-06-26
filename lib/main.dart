@@ -6,6 +6,7 @@ import 'package:writerapp/pages/pageview.dart';
 import 'package:writerapp/pages/diff_viewer.dart';
 void main() => runApp(
   MaterialApp(
+    theme: ThemeData.dark(),
     initialRoute: "/home",
     routes: {
       "/home": (context) => Home(),

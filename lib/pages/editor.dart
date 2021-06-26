@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:writerapp/db/file_db.dart';
 
 import 'package:async/async.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
 
 
 final globalKeyGetTextField = GlobalKey();
+
 
 class Edit extends StatelessWidget {
   @override
@@ -50,21 +53,32 @@ class Edit extends StatelessWidget {
           ),
           body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 20),
-        child: Stack(
+        child: Column(
           children: <Widget>[
             // CustomPaint(
             //   painter: TextUnderLinePainter(),
             // ),
-            TextField(
+            Container(
+              child:             TextField(
               key: globalKeyGetTextField,
               keyboardType: TextInputType.multiline,
-              maxLines: null,
-              decoration: const InputDecoration(border: InputBorder.none),
+              maxLines: 30,
+                  decoration: InputDecoration(
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: Colors.green,
+                    ),
+                  ),
+                ),
+              // decoration: const InputDecoration(border: InputBorder.none),
               controller: TextEditingController(text: getfile.content),
               onChanged: (text) {
                 getfile.content = text;
+                if (text.length > 10000){
+                  Fluttertoast.showToast(msg: '一万文字を超えました　ファイルの分割をおすすめします');
+                }
               },
-            ),
+            )),
           ],
         ),
       ),

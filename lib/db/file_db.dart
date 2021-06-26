@@ -8,7 +8,7 @@ import 'package:writerapp/db/folder_db.dart';
 class MainFile {
   final int? id;
   final int? folderId;
-  final String title;
+  String title;
   String content;
   final bool isDone;
   final DateTime createdAt;
@@ -144,5 +144,15 @@ class InfolderDb {
     final folderdb = new FolderDb();
     await folderdb.initDb();
     folderdb.updateUpdateAt(folderId);
+  }
+
+  Future<void> updateName(MainFile file) async {
+    await this._db.rawUpdate(
+      /*sql=*/ '''
+      UPDATE $kDbTableName
+      SET title = ?
+      WHERE id = ?''',
+      /*args=*/ [file.title,file.id],
+    );
   }
 }

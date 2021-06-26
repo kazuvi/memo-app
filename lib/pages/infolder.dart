@@ -64,19 +64,109 @@ class _InfolderState extends State<Infolder> {
             overflow: TextOverflow.ellipsis,
             strutStyle: StrutStyle(fontSize: 10.0),
             text: TextSpan(
-              style: TextStyle(color: Colors.black.withOpacity(0.5)),
               text: 'prev: ${file.content.replaceAll('\n', '')}'
             ),
           ),
-          trailing: IconButton(
+          trailing:
+          IconButton(
             icon: const Icon(Icons.more_horiz),
-            // onPressed: () async {
-            //   await db.deleteFileItem(file);
-            //   _updateUI(file.folderId);
-            // }
-                onPressed: ()async {
-                  Navigator.pushNamed(this.context, "/view",arguments: FileArguments(file.title, file.id, file.folderId, file.content));
+            onPressed: () async {
+            showDialog<String>(
+              context: context,
+              builder: (BuildContext context) => SimpleDialog(
+                title: Text(file.title),
+                children: <Widget>[
+                  ListTile(
+                    leading: const Icon(Icons.menu_book),
+                    title: const Text('閲覧'),
+                    onTap: ()async {
+                      Navigator.pushNamed(this.context, "/view",arguments: FileArguments(file.title, file.id, file.folderId, file.content));
                     },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.edit),
+                    title: const Text('編集'),
+                    onTap: () async {
+                      Navigator.of(context).pop();
+                        showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        String title = file.title;
+                        return AlertDialog(
+                          title: Text('編集'),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              TextField(
+                                autofocus: true,
+                                controller: TextEditingController(text: file.title),
+                                decoration: new InputDecoration(
+                                  labelText: 'タイトル'
+                                ),
+                                onChanged: (value) {
+                                  title = value;
+                                },
+                              ),
+                            ]
+                          ),
+                          actions: <Widget>[
+                            TextButton(
+                              child: Text("キャンセル"),
+                              onPressed: () => Navigator.of(context).pop(),
+                            ),
+                            TextButton(
+                              child: Text('更新'),
+                              onPressed: () async {
+                                file.title = title;
+                                await db.updateName(file);
+                                Navigator.of(context).pop();
+                                _updateUI(file.folderId);
+                              },
+                            ),
+                          ],
+                        );
+                        },
+                      );
+                    }
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.delete),
+                    title: const Text('削除'),
+                    onTap: () async{
+                      Navigator.of(context).pop();
+                      showDialog(context: context,
+                        builder:  (BuildContext context) => AlertDialog(
+                          content: const Text('このフォルダのファイルはすべて消去されます'),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () async{
+                                    await db.deleteFileItem(file);
+                                    _updateUI(file.folderId);
+                                    Navigator.of(context).pop();
+                                },
+                                child: const Text('Ok'),
+                              ),
+                            ],
+                      ));
+                    },
+                  ),
+                ],
+              ),
+            ).then((returnVal) {
+              if (returnVal != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('You clicked: $returnVal'),
+                    action: SnackBarAction(label: 'OK', onPressed: () {}),
+                  ),
+                );
+              }
+            });
+          },
           ),
         ),
       )

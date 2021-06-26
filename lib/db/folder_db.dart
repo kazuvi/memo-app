@@ -7,8 +7,8 @@ import 'package:writerapp/db/file_db.dart';
 
 class Folder {
   final int? id;
-  final String title;
-  final String tags;
+  String title;
+  String tags;
   final bool isDone;
   final DateTime createdAt;
   final DateTime updateAt;
@@ -74,10 +74,9 @@ class FolderDb {
     );
   }
 
-  // Retrieves rows from the db table.
   Future<List> getFolderItems() async {
     final List<Map<String, dynamic>> jsons =
-    await this._db.rawQuery('SELECT * FROM $kDbTableName');
+    await this._db.rawQuery('SELECT * FROM $kDbTableName ORDER BY updateAt DESC');
     folders = jsons.map((json) => Folder.fromJsonMap(json)).toList();
     return folders;
   }
@@ -127,5 +126,36 @@ class FolderDb {
       WHERE id = ?''',
       /*args=*/ [DateTime.now().millisecondsSinceEpoch, folderId],
     );
+  }
+
+    Future<void> updateNameTag(Folder folder) async {
+    await this._db.rawUpdate(
+      /*sql=*/ '''
+      UPDATE $kDbTableName
+      SET title = ?, tags = ?
+      WHERE id = ?''',
+      /*args=*/ [folder.title, folder.tags, folder.id],
+    );
+  }
+
+    Future<List> orderCreateTimeFolderItems(bool isDesc) async {
+    final List<Map<String, dynamic>> jsons =
+    await this._db.rawQuery(isDesc ? 'SELECT * FROM $kDbTableName ORDER BY createdAt DESC' :'SELECT * FROM $kDbTableName ORDER BY createdAt');
+    folders = jsons.map((json) => Folder.fromJsonMap(json)).toList();
+    return folders;
+  }
+
+      Future<List> orderUpdateTimeFolderItems(bool isDesc) async {
+    final List<Map<String, dynamic>> jsons =
+    await this._db.rawQuery(isDesc ? 'SELECT * FROM $kDbTableName ORDER BY updateAt DESC' :'SELECT * FROM $kDbTableName ORDER BY updateAt');
+    folders = jsons.map((json) => Folder.fromJsonMap(json)).toList();
+    return folders;
+  }
+
+  Future<List> sortFolderItems(String tag, isDesc) async {
+    final List<Map<String, dynamic>> jsons =
+    await this._db.rawQuery('SELECT * FROM $kDbTableName WHERE tags LIKE ?',[tag]);
+    folders = jsons.map((json) => Folder.fromJsonMap(json)).toList();
+    return folders;
   }
 }

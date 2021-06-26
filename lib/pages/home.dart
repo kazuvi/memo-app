@@ -56,15 +56,117 @@ class _HomeState extends State<Home> {
               decoration: folder.isDone ? TextDecoration.lineThrough : null
             ),
           ),
-          subtitle: Text('タグ: ${folder.tags}\n最終更新日: ${outputFormat.format(folder.updateAt)}'),
+          subtitle: Text(folder.tags == "" ? '\n最終更新日: ${outputFormat.format(folder.updateAt)}':'Tag: ${folder.tags}\n最終更新日: ${outputFormat.format(folder.updateAt)}'),
           isThreeLine: true,
           trailing:
           IconButton(
-            icon: const Icon(Icons.delete),
+            icon: const Icon(Icons.more_horiz),
             onPressed: () async {
-              await db.deleteFolderItem(folder);
-              _updateUI();
-            }
+            showDialog<String>(
+              context: context,
+              builder: (BuildContext context) => SimpleDialog(
+                title: Text(folder.title),
+                children: <Widget>[
+                  // ListTile(
+                  //   leading: const Icon(Icons.account_circle),
+                  //   title: const Text('user@example.com'),
+                  //   onTap: () => Navigator.pop(context, 'user@example.com'),
+                  // ),
+                  ListTile(
+                    leading: const Icon(Icons.edit),
+                    title: const Text('編集'),
+                    onTap: () async {
+                      Navigator.of(context).pop();
+                        showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        String title = folder.title;
+                        String tags = folder.tags;
+                        return AlertDialog(
+                          title: Text('編集'),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              TextField(
+                                autofocus: true,
+                                controller: TextEditingController(text: folder.title),
+                                decoration: new InputDecoration(
+                                  labelText: 'タイトル'
+                                ),
+                                onChanged: (value) {
+                                  title = value;
+                                },
+                              ),
+                              TextField(
+                                controller: TextEditingController(text: folder.tags),
+                                decoration: new InputDecoration(
+                                  labelText: 'タグ', hintText: '、で区切ってください'
+                                ),
+                                onChanged: (value) {
+                                tags = value;
+                                },
+                              ),
+                            ]
+                          ),
+                          actions: <Widget>[
+                            TextButton(
+                              child: Text("キャンセル"),
+                              onPressed: () => Navigator.of(context).pop(),
+                            ),
+                            TextButton(
+                              child: Text('更新'),
+                              onPressed: () async {
+                                folder.title = title;
+                                folder.tags = tags;
+                                await db.updateNameTag(folder);
+                                Navigator.of(context).pop();
+                                _updateUI();
+                              },
+                            ),
+                          ],
+                        );
+                        },
+                      );
+                    }
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.delete),
+                    title: const Text('削除'),
+                    onTap: () async{
+                      Navigator.of(context).pop();
+                      showDialog(context: context,
+                        builder:  (BuildContext context) => AlertDialog(
+                          content: const Text('このフォルダのファイルはすべて消去されます'),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () async{
+                                    await db.deleteFolderItem(folder);
+                                    _updateUI();
+                                    Navigator.of(context).pop();
+                                },
+                                child: const Text('Ok'),
+                              ),
+                            ],
+                      ));
+                    },
+                  ),
+                ],
+              ),
+            ).then((returnVal) {
+              if (returnVal != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('You clicked: $returnVal'),
+                    action: SnackBarAction(label: 'OK', onPressed: () {}),
+                  ),
+                );
+              }
+            });
+          },
           ),
         ),
       )
@@ -90,14 +192,101 @@ class _HomeState extends State<Home> {
                 ),
               ),
             ),
+
             IconButton(
               icon: const Icon(Icons.search),
-              onPressed: () =>
-                Fluttertoast.showToast(msg: 'Dummy search action.'),
+              onPressed: () async {
+                String sortTag = "";
+                showDialog<String>(
+              context: context,
+              builder: (BuildContext context) =>
+                AlertDialog(
+                  title: Text('タグ検索'),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      TextField(
+                        controller: TextEditingController(text: sortTag),
+                        autofocus: true,
+                        decoration: new InputDecoration(
+                          labelText: 'タグ'
+                        ),
+                        onChanged: (value) async {
+                          if (value != ""){
+                          sortTag = value;
+                          var isDesc = false;
+                          this._files = await db.sortFolderItems(sortTag, isDesc) as List<Folder>;
+                          setState(() {});
+                          }
+                        },
+                      ),
+                    ]
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      child: Text('OK'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                )
+                            );
+              }
             ),
+
             IconButton(
-              icon: const Icon(Icons.more_vert),
-              onPressed: () => Fluttertoast.showToast(msg: 'Dummy menu action.'),
+              icon: const Icon(Icons.sort),
+              onPressed: () {
+            showDialog<String>(
+              context: context,
+              builder: (BuildContext context) => SimpleDialog(
+                title: const Text('並び替え'),
+                children: <Widget>[
+                  ListTile(
+                    // leading: const Icon(Icons.account_circle),
+                    title: const Text('更新日時 昇順'),
+                    onTap: ()async {
+                      var isDesc = false;
+                      this._files = await db.orderUpdateTimeFolderItems(isDesc) as List<Folder>;
+                      setState(() {});
+                      Navigator.of(context).pop();
+                    },
+                  ),
+
+                  ListTile(
+                    title: const Text('更新日時 降順'),
+                    onTap: ()async {
+                      var isDesc = true;
+                      this._files = await db.orderUpdateTimeFolderItems(isDesc) as List<Folder>;
+                      setState(() {});
+                      Navigator.of(context).pop();
+                    },
+                  ),
+
+                  ListTile(
+                    title: const Text('作成日時 昇順'),
+                    onTap: () async{
+                      var isDesc = false;
+                      this._files = await db.orderCreateTimeFolderItems(isDesc) as List<Folder>;
+                      setState(() {});
+                      Navigator.of(context).pop();
+                    },
+                  ),
+
+                  ListTile(
+                    title: const Text('作成日時 降順'),
+                    onTap: () async{
+                      var isDesc = true;
+                      this._files = await db.orderCreateTimeFolderItems(isDesc) as List<Folder>;
+                      setState(() {});
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
             ),
           ],
         ),
