@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:writerapp/db/file_db.dart';
+import 'package:writerapp/db/diff_db.dart';
 
 import 'package:async/async.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -85,14 +86,25 @@ class Edit extends StatelessWidget {
           backgroundColor: Colors.white.withOpacity(0.8),
           floatingActionButton: FloatingActionButton(
               child: const Icon(Icons.toll_rounded),
-              onPressed: () => showModalBottomSheet(
-                  context: context,
-                  builder: (BuildContext context) => Container(
-                    alignment: Alignment.center,
-                    height: 200,
-                    child: const Text('Dummy bottom sheet'),
-                  ),
-                ),
+              onPressed: () async{
+                var diffdb = new DiffmakeDB();
+                await diffdb.initDb();
+                Future<List> list = diffdb.commit(getfile.folderId, getfile.id, getfile.content);
+                List diffitems = await list ;
+                await diffdb.addFileItem(
+                  DiffFile(
+                    folderId: getfile.folderId,
+                    folderFileId: getfile.folderId.toString() + "-" + getfile.id.toString(),
+                    title: getfile.title,
+                    content: getfile.content,
+                    diff: diffitems[0],
+                    message: "insaert message",
+                    plusChar: diffitems[1],
+                    minusChar: diffitems[2],
+                    createdAt: DateTime.now()
+                  )
+                );
+              }
             ),
             floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
         ),

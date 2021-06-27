@@ -12,7 +12,7 @@ class DiffViewer extends StatelessWidget {
       sprr.removeAt(sprr.length - 1);
     }
 
-        return SafeArea(
+      return SafeArea(
         child: Container(
             child: Scaffold(
             appBar: PreferredSize(

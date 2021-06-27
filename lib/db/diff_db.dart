@@ -12,9 +12,12 @@ class DiffFile {
   final String title;
   String content;
   String diff;
+  String message;
+  final int? plusChar;
+  final int? minusChar;
   final DateTime createdAt;
 
-  DiffFile({this.id, this.folderId, this.folderFileId = "", this.title = "", this.content ="", this.diff = "", required this.createdAt});
+  DiffFile({this.id, this.folderId, this.folderFileId = "", this.title = "", this.content ="", this.diff = "", this.message= "", this.plusChar, this.minusChar, required this.createdAt});
   DiffFile.fromJsonMap(Map<String, dynamic> map):
     id = map['id'] as int,
     folderId = map['folderId'] as int,
@@ -22,6 +25,9 @@ class DiffFile {
     title = map['title'] as String,
     content = map['content'] as String,
     diff = map['diff'] as String,
+    message = map['message'] as String,
+    plusChar = map['plusChar'] as int,
+    minusChar = map['minusChar'] as int,
     createdAt =
     DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int);
   Map<String, dynamic> toJsonMap() => {
@@ -31,12 +37,16 @@ class DiffFile {
     'title': title,
     'content': content,
     'diff': diff,
+    "message": message,
+    "plusChar": plusChar,
+    "minusChar": minusChar,
     'createdAt': createdAt.millisecondsSinceEpoch,
   };
 }
 
+
 class DiffmakeDB {
-  static const kDbFileName = 'diff_demo.db';
+  static const kDbFileName = 'diff_demo2.db';
   static const kDbTableName = 'diff_tbl';
   late Database _db;
   List<DiffFile> files = [];
@@ -59,18 +69,32 @@ class DiffmakeDB {
           title TEXT,
           content TEXT,
           diff TEXT,
+          message TEXT,
+          plusChar INTEGER,
+          minusChar INTEGER,
           createdAt INT
           )
         ''');
       },
     );
   }
-  Future<List> getFileItems(int? id) async {
+  Future<List> getDiffItems(int? folderid, int? fileid) async {
+    String strfolderid = folderid.toString();
+    String strfileid = fileid.toString();
+    String folderfileid = "$strfolderid-$strfileid";
     final List<Map<String, dynamic>> jsons =
-    await this._db.rawQuery('SELECT * FROM $kDbTableName WHERE folderId=?',[id]);
+    await this._db.rawQuery('SELECT * FROM $kDbTableName WHERE folderFileId=?',[folderfileid]);
     files = jsons.map((json) => DiffFile.fromJsonMap(json)).toList();
     return files;
   }
+
+  Future<String>  getPrevFileContent(int? id) async {
+    final List<Map<String, dynamic>> jsons =
+    await this._db.rawQuery('SELECT * FROM $kDbTableName WHERE id=?',[id]);
+    files = jsons.map((json) => DiffFile.fromJsonMap(json)).toList();
+    return files[0].diff;
+  }
+
   Future<List>  getPrevFiles(int? folderid, int? fileid) async {
     String strfolderid = folderid.toString();
     String strfileid = fileid.toString();
@@ -80,7 +104,7 @@ class DiffmakeDB {
     files = jsons.map((json) => DiffFile.fromJsonMap(json)).toList();
     return files;
   }
-  Future<String> commit(int? folderId, int? fileid, String currContent) async {
+  Future<List> commit(int? folderId, int? fileid, String currContent) async {
     String prevContent;
     await this.getPrevFiles(folderId, fileid);
     if (this.files.length == 0) {
@@ -88,25 +112,9 @@ class DiffmakeDB {
     }else {
       prevContent = this.files[0].content;
     }
-    String rr = getDiff(prevContent, currContent).replaceAll('@|sprite|@@|sprite|@', '@|sprite|@');
-
-    List<String> sprr = rr.split("@|sprite|@");
-    if (sprr[0] == "") {
-      sprr.removeAt(0);
-    }
-    if (sprr[sprr.length - 1] == "") {
-      sprr.removeAt(sprr.length - 1);
-    }
-
-    print(sprr);
-    // for (var i=0; i < sprr.length; i++){
-    //   if (sprr[i].substring(0,1) == "+") {
-    //     print("add" + sprr[i]);
-    //   } else {
-    //     print(sprr[i]);
-    //   }
-    // }
-    return rr;
+    List diffitems = getDiff(prevContent, currContent);
+    diffitems[0].replaceAll('@|sprite|@@|sprite|@', '@|sprite|@');
+    return diffitems;
   }
 
   Future<void> addFileItem(DiffFile file) async {
@@ -114,7 +122,7 @@ class DiffmakeDB {
       (Transaction txn) async {
         await txn.rawInsert('''
           INSERT INTO $kDbTableName
-            (folderId, folderFileId, title, content, diff, createdAt)
+            (folderId, folderFileId, title, content, diff, message, plusChar, minusChar, createdAt)
           VALUES
             (
               "${file.folderId}",
@@ -122,6 +130,9 @@ class DiffmakeDB {
               "${file.title}",
               "${file.content}",
               "${file.diff}",
+              "${file.message}",
+              "${file.plusChar}",
+              "${file.minusChar}",
               ${file.createdAt.millisecondsSinceEpoch}
             )''');
       },

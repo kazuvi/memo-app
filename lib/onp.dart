@@ -1,51 +1,58 @@
 getDiff(prev, curr) {
   var result = onp(prev, curr);
-  var diff = formatDiff(prev, curr, result);
-  return diff;
+  var diffItems = formatDiff(prev, curr, result);
+  return diffItems;
 }
 
 formatDiff(prev, curr, result) {
-        var index = [0, 0]; // [prev, curr]
-        var string = "";
-        for (var i = 0; i < result[1].length; i++) {
-            if (index[1] < result[1][i][1]) {
-                string += '@|sprite|@+';
-                while (index[1] < result[1][i][1]) {
-                    string += curr[index[1]];
-                    index[1]++;
-                }
-                string += '@|sprite|@';
-            }
-            if (index[0] < result[1][i][0]) {
-                string += '@|sprite|@-';
-                while (index[0] < result[1][i][0]) {
-                    string += prev[index[0]];
-                    index[0]++;
-                }
-                string += '@|sprite|@';
-            }
-            string += prev[result[1][i][0]];
-            index[0]++;
-            index[1]++;
-        }
-        if (index[1] < curr.length) {
-            string += '@|sprite|@+';
-            while (index[1] < curr.length) {
-                string += curr[index[1]];
-                index[1]++;
-            }
-            string += '@|sprite|@';
-        }
-        if (index[0] < prev.length) {
-            string += '@|sprite|@-';
-            while (index[0] < prev.length) {
-                string += prev[index[0]];
-                index[0]++;
-            }
-            string += '@|sprite|@';
-        }
-        return string;
-    }
+  var index = [0, 0]; // [prev, curr]
+  var string = "";
+  var plusChar  = 0;
+  var minusChar = 0;
+  for (var i = 0; i < result[1].length; i++) {
+      if (index[1] < result[1][i][1]) {
+          string += '@|sprite|@+';
+          while (index[1] < result[1][i][1]) {
+              string += curr[index[1]];
+              index[1]++;
+              plusChar += 1;
+          }
+          string += '@|sprite|@';
+      }
+      if (index[0] < result[1][i][0]) {
+          string += '@|sprite|@-';
+          while (index[0] < result[1][i][0]) {
+              string += prev[index[0]];
+              index[0]++;
+              minusChar -= 1;
+          }
+          string += '@|sprite|@';
+      }
+      string += prev[result[1][i][0]];
+      index[0]++;
+      index[1]++;
+  }
+  if (index[1] < curr.length) {
+      string += '@|sprite|@+';
+      while (index[1] < curr.length) {
+          string += curr[index[1]];
+          index[1]++;
+          plusChar += 1;
+      }
+      string += '@|sprite|@';
+  }
+  if (index[0] < prev.length) {
+      string += '@|sprite|@-';
+      while (index[0] < prev.length) {
+          string += prev[index[0]];
+          index[0]++;
+              minusChar -= 1;
+
+      }
+      string += '@|sprite|@';
+  }
+  return [string, plusChar, minusChar];
+}
 
 onp(A, B) {
   var N = A.length;

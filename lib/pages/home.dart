@@ -225,11 +225,10 @@ class _HomeState extends State<Home> {
                       },
                     ),
                   ],
-                )
-                            );
+                  )
+                );
               }
             ),
-
             IconButton(
               icon: const Icon(Icons.sort),
               onPressed: () {

@@ -4,42 +4,40 @@ import 'package:intl/intl.dart';
 import 'package:async/async.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import 'package:writerapp/db/folder_db.dart';
+// import 'package:writerapp/db/folder_db.dart';
 import 'package:writerapp/db/file_db.dart';
 import 'package:writerapp/db/diff_db.dart';
 
-class Infolder extends StatefulWidget {
+class DiffList extends StatefulWidget {
   final int? folderId;
-  Infolder({Key ?key, this.folderId}) : super(key: key);
+  DiffList({Key ?key, this.folderId}) : super(key: key);
   @override
-  _InfolderState createState() => _InfolderState();
+  _DiffListState createState() => _DiffListState();
 }
 
-class _InfolderState extends State<Infolder> {
-  List<MainFile> _files = [];
-  final db = new InfolderDb();
+class _DiffListState extends State<DiffList> {
+  List<DiffFile> _files = [];
+  final db = new DiffmakeDB();
   final AsyncMemoizer _memoizer = AsyncMemoizer();
   DateFormat outputFormat = DateFormat('yyyy-MM-dd HH:mm');
 
-  Future<bool> asyncInit(int? getid) async {
+  Future<bool> asyncInit(int? folderid, int? fileid) async {
     await _memoizer.runOnce(() async {
       await db.initDb();
-      this._files =  await db.getFileItems(getid)as List<MainFile>;
+      this._files =  await db.getDiffItems(folderid, fileid)as List<DiffFile>;
     });
     return true;
   }
 
-  Future<void> _updateUI(int? id) async {
-    this._files = await db.getFileItems(id) as List<MainFile>;
+  Future<void> _updateUI(int? folderid, int? fileid) async {
+    this._files = await db.getDiffItems(folderid, fileid) as List<DiffFile>;
     setState(() {});
   }
 
-  Card _itemToListTile(MainFile file) => Card(
+  Card _itemToListTile(DiffFile file) => Card(
     child : InkWell(
       onTap: ()async {
-        var result = await Navigator.pushNamed(this.context, "/editor",arguments: FileArguments(file.title, file.id, file.folderId, file.content));
-        file.content = result as String;
-        setState(() {});
+        var result = await Navigator.pushNamed(context, "/diffview", arguments: await db.getPrevFileContent(file.id));
       },
     child: Container(
 
@@ -53,9 +51,9 @@ class _InfolderState extends State<Infolder> {
 
         child: ListTile(
           title: Text(
-            file.title,
+            file.message,
           ),
-          subtitle: Text('${file.content.length}字'),
+          subtitle: Text('+${file.plusChar} ${file.minusChar}\n${outputFormat.format(file.createdAt)}'),
           trailing:
           IconButton(
             icon: const Icon(Icons.more_horiz),
@@ -65,25 +63,6 @@ class _InfolderState extends State<Infolder> {
               builder: (BuildContext context) => SimpleDialog(
                 title: Text(file.title),
                 children: <Widget>[
-                  ListTile(
-                    leading: const Icon(Icons.menu_book),
-                    title: const Text('閲覧'),
-                    onTap: ()async {
-                      Navigator.of(context).pop();
-                      Navigator.pushNamed(this.context, "/view",arguments: FileArguments(file.title, file.id, file.folderId, file.content));
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.history),
-                    title: const Text('更新履歴'),
-                    onTap: ()async {
-                      var diffdb = new DiffmakeDB();
-                      await diffdb.initDb();
-
-                      Navigator.of(context).pop();
-                      Navigator.pushNamed(context, "/difflist", arguments: FileArguments(file.title, file.id, file.folderId, file.content));
-                    },
-                  ),
                   ListTile(
                     leading: const Icon(Icons.edit),
                     title: const Text('編集'),
@@ -118,10 +97,10 @@ class _InfolderState extends State<Infolder> {
                             TextButton(
                               child: Text('更新'),
                               onPressed: () async {
-                                file.title = title;
-                                await db.updateName(file);
+                                file.message = title;
+                                // await db.updateName(file);
                                 Navigator.of(context).pop();
-                                _updateUI(file.folderId);
+                                // _updateUI(file.folderFileId);
                               },
                             ),
                           ],
@@ -145,8 +124,8 @@ class _InfolderState extends State<Infolder> {
                               ),
                               TextButton(
                                 onPressed: () async{
-                                    await db.deleteFileItem(file);
-                                    _updateUI(file.folderId);
+                                    // await db.deleteFileItem(file);
+                                    // _updateUI(file.folderId);
                                     Navigator.of(context).pop();
                                 },
                                 child: const Text('Ok'),
@@ -176,7 +155,7 @@ class _InfolderState extends State<Infolder> {
 
   @override
   Widget build(BuildContext context) {
-    final getfolderId = ModalRoute.of(context)!.settings.arguments as FolderArguments;
+    final getFileArgs = ModalRoute.of(context)!.settings.arguments as FileArguments;
     final bottomNavBar = BottomAppBar(
       shape:  const CircularNotchedRectangle(),
       color: Theme.of(context).primaryColor,
@@ -208,7 +187,7 @@ class _InfolderState extends State<Infolder> {
       );
 
     return FutureBuilder<bool>(
-      future: asyncInit(getfolderId.folderId),
+      future: asyncInit(getFileArgs.folderId, getFileArgs.id),
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data == false) {
           return const Center(
@@ -229,7 +208,7 @@ class _InfolderState extends State<Infolder> {
               // backgroundColor: Colors.black.withOpacity(0.7),
               preferredSize: Size.fromHeight(50.0),
               child: AppBar(
-                title: Text(getfolderId.title),
+                title: Text(getFileArgs.title),
                 centerTitle: true,
               ),
             ),
@@ -238,60 +217,6 @@ class _InfolderState extends State<Infolder> {
             body:   ListView(
               children: this._files.map(_itemToListTile).toList(),
             ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: () async {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          String title = "";
-                          String tags = "";
-                          return AlertDialog(
-                            title: Text('新規作成'),
-                            content: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                TextField(
-                                  autofocus: true,
-                                  decoration: new InputDecoration(
-                                    labelText: 'タイトル'
-                                  ),
-                                  onChanged: (value) {
-                                    title = value;
-                                  },
-                                ),
-                              ]
-                            ),
-                            actions: <Widget>[
-                              TextButton(
-                                child: Text("Cancel"),
-                                onPressed: () => Navigator.of(context).pop(title),
-                              ),
-                              TextButton(
-                                child: Text('Ok'),
-                                onPressed: () async {
-                                  await db.addFileItem(
-                                    MainFile(
-                                      folderId: getfolderId.folderId,
-                                      title: title,
-                                      content: "",
-                                      createdAt: DateTime.now(),
-                                      updateAt: DateTime.now(),
-                                    ),
-                                  );
-                                Navigator.of(context).pop(title);
-                                  await Navigator.pushNamed(this.context, "/editor",arguments: FileArguments(title, await db.getNowCreateId(), getfolderId.folderId, ""));
-                                  _updateUI(getfolderId.folderId);
-                                  setState(() {});
-                                },
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    },
-              child: const Icon(Icons.add),
-            ),
-            floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
           ),
         );
       },
