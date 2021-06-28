@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:writerapp/db/file_db.dart';
 
@@ -96,6 +97,9 @@ class ContentSliverList extends StatelessWidget {
         page = "";
         count = 0;
       }
+      if (list[i] == "\n" && list[i-1] != "\n"){
+        page = page + "\n";
+      }
       page = page + list[i];
       if (list[i].length == maxstring_1line){
         page = page + "\n";
@@ -120,6 +124,7 @@ class ContentSliverList extends StatelessWidget {
           height: MediaQuery.of(context).size.height,
           child:
           PageView.builder(
+            reverse: false,
             itemCount: page.length,
             controller: PageController(viewportFraction: 1),
             itemBuilder: (BuildContext context, int itemIndex) {
@@ -135,6 +140,7 @@ class ContentSliverList extends StatelessWidget {
   Widget _buildHorizontalItem(
     BuildContext context, int carouselIndex, int itemIndex) {
     final fileData = ModalRoute.of(context)!.settings.arguments as FileArguments;
+    var pageNum = itemIndex + 1;
     List page = pagecreate(fileData.content);
 
     return SafeArea(child: Padding(
@@ -142,30 +148,36 @@ class ContentSliverList extends StatelessWidget {
       child: Column(
         children: <Widget>[
           Container(
+            padding: EdgeInsets.symmetric(horizontal: 25),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
                   itemIndex == 0 ? fileData.title: "",
                   textAlign: TextAlign.left,
-                  // overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white, height: 2, fontSize: 24),
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontWeight: FontWeight.w500, color: Colors.black, height: 2, fontSize: 24),
                 ),
                 Text(
                   page[itemIndex],
                   textAlign: TextAlign.left,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontWeight: FontWeight.w100, color: Colors.white, height: 2, fontSize: 14),
+                  style: TextStyle(fontWeight: FontWeight.w100, color: Colors.black, height: 2, fontSize: 14),
                 ),
-                Text(itemIndex.toString()),
+                Text("P.${pageNum.toString()} / ${carouselIndex.toString()}"),
               ]
             ),
             height: MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top,
             width: MediaQuery.of(context).size.width,
+
             decoration: BoxDecoration(
-            color: Colors.grey,
-            borderRadius: BorderRadius.all(Radius.circular(15.0)),
+              borderRadius: BorderRadius.all(Radius.circular(15.0)),
+              image: DecorationImage(
+              image: AssetImage('assets/old_paper.png'),
+              fit: BoxFit.cover,
             ),
+          ),
+
           )
         ],
       ),

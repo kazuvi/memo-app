@@ -212,7 +212,6 @@ class _DiffListState extends State<DiffList> {
                 centerTitle: true,
               ),
             ),
-            bottomNavigationBar: bottomNavBar,
             // backgroundColor: Colors.black.withOpacity(0.5),
             body:   ListView(
               children: this._files.map(_itemToListTile).toList(),

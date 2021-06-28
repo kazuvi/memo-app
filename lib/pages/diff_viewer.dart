@@ -12,6 +12,8 @@ class DiffViewer extends StatelessWidget {
       sprr.removeAt(sprr.length - 1);
     }
 
+
+
       return SafeArea(
         child: Container(
             child: Scaffold(
@@ -30,11 +32,10 @@ class DiffViewer extends StatelessWidget {
   Widget getTextWidgets(List<String> strings)
   {
     return new Column(children: strings.map((item) => new Container(
-      height: 30,
+      height: 50,
       width: 400,
-      color: item.substring(0,1) == "+" ? Colors.green[300]: item.substring(0,1) == "-" ? Colors.red[300] : Colors.white,
+      color: item.length < 1 ? Colors.white : item.substring(0,1) == "+" ? Colors.green[300]: item.substring(0,1) == "-" ? Colors.red[300] : Colors.white,
       child: Text(item),
-
     )).toList());
   }
 }

@@ -138,7 +138,6 @@ class TextUnderLinePainter extends CustomPainter {
           paint);
     }
 
-
     // for (var i = 1; i <= 100; i++) {
     //   canvas.drawLine(
     //       Offset(ruledLineHSpace * i + ruledLineContentPadding, 0),
