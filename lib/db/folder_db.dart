@@ -149,7 +149,7 @@ class FolderDb {
 
   Future<List> sortFolderItems(String tag, isDesc) async {
     final List<Map<String, dynamic>> jsons =
-    await this._db.rawQuery('SELECT * FROM $kDbTableName WHERE tags LIKE ?',[tag]);
+    await this._db.rawQuery("SELECT * FROM $kDbTableName WHERE tags LIKE '%$tag%'");
     folders = jsons.map((json) => Folder.fromJsonMap(json)).toList();
     return folders;
   }

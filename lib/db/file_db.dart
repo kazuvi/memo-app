@@ -19,7 +19,7 @@ class MainFile {
       : id = map['id'] as int,
         folderId = map['folderId'] as int,
         title = map['title'] as String,
-        content = map['content'] as String,
+        content = map['content'] as String ,
         createdAt =
           DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int),
         updateAt =

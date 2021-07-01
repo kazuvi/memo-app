@@ -54,8 +54,11 @@ class _InfolderState extends State<Infolder> {
         child: ListTile(
           title: Text(
             file.title,
+            style: TextStyle(fontSize: 16),
           ),
-          subtitle: Text('${file.content.length}字'),
+          subtitle: Text('${file.content.length}字\n${file.content.length <= 15 ? file.content.replaceAll("\n", "") :file.content.replaceAll("\n", "").substring(0, 15) + "..."}',
+          style: TextStyle(height: 1.2),
+          ),
           trailing:
           IconButton(
             icon: const Icon(Icons.more_horiz),
@@ -69,8 +72,12 @@ class _InfolderState extends State<Infolder> {
                     leading: const Icon(Icons.menu_book),
                     title: const Text('閲覧'),
                     onTap: ()async {
-                      Navigator.of(context).pop();
-                      Navigator.pushNamed(this.context, "/view",arguments: FileArguments(file.title, file.id, file.folderId, file.content));
+                      if (file.content == ""){
+                        Fluttertoast.showToast(msg: "本文が空です");
+                      } else {
+                        Navigator.of(context).pop();
+                        Navigator.pushNamed(this.context, "/view",arguments: FileArguments(file.title, file.id, file.folderId, file.content));
+                      }
                     },
                   ),
                   ListTile(
@@ -79,7 +86,6 @@ class _InfolderState extends State<Infolder> {
                     onTap: ()async {
                       var diffdb = new DiffmakeDB();
                       await diffdb.initDb();
-
                       Navigator.of(context).pop();
                       Navigator.pushNamed(context, "/difflist", arguments: FileArguments(file.title, file.id, file.folderId, file.content));
                     },
@@ -244,7 +250,6 @@ class _InfolderState extends State<Infolder> {
                         context: context,
                         builder: (BuildContext context) {
                           String title = "";
-                          String tags = "";
                           return AlertDialog(
                             title: Text('新規作成'),
                             content: Column(

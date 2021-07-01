@@ -5,29 +5,28 @@ import 'package:writerapp/db/file_db.dart';
 class ContentSliverList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-      return Container(
-            child: Scaffold(
-                // appBar: PreferredSize(
-                //   // backgroundColor: Colors.black.withOpacity(0.7),
-                //   preferredSize: Size.fromHeight(40.0),
-                //   child: AppBar(
-                //     title: Text(fileData.title),
-                //   ),
-                // ),
-                body:
-                  CustomScrollView(
-                  slivers: [SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (BuildContext context, int index) {
-                        if (index % 2 == 0) {
-                          return Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                          );
-                        } else {
-                          return _buildHorizontalPageView(context);
-                        }
-                      },
-                      childCount: 2,
+    return Container(
+      child: Scaffold(
+          // appBar: PreferredSize(
+          //   // backgroundColor: Colors.black.withOpacity(0.7),
+          //   preferredSize: Size.fromHeight(40.0),
+          //   child: AppBar(
+          //     title: Text(fileData.title),
+          //   ),
+          // ),
+          body: CustomScrollView(
+            slivers: [SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) {
+                  if (index % 2 == 0) {
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                    );
+                  } else {
+                    return _buildHorizontalPageView(context);
+                  }
+                },
+                childCount: 2,
               ),
             )
           ],
@@ -36,8 +35,8 @@ class ContentSliverList extends StatelessWidget {
     );
   }
 
-  int maxlines = 19;
-  int maxstring_1line = 23;
+  final int maxlines = 24;
+  final int maxstring_1line = 23;
 
   pagecreate(String content){
     List lines = [];
@@ -158,11 +157,14 @@ class ContentSliverList extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontWeight: FontWeight.w500, color: Colors.black, height: 2, fontSize: 24),
                 ),
-                Text(
-                  page[itemIndex],
+                FittedBox(
+                  fit: BoxFit.cover,
+                  child: Text(
+                  page[itemIndex] + "\n",
                   textAlign: TextAlign.left,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontWeight: FontWeight.w100, color: Colors.black, height: 2, fontSize: 14),
+                  ),
                 ),
                 Text("P.${pageNum.toString()} / ${carouselIndex.toString()}"),
               ]

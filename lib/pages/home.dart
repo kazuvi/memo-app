@@ -51,7 +51,7 @@ class _HomeState extends State<Home> {
             title: Text(
               folder.title,
             ),
-          subtitle: Text(folder.tags == "" ? '\n最終更新日: ${outputFormat.format(folder.updateAt)}':'Tag: ${folder.tags}\n最終更新日: ${outputFormat.format(folder.updateAt)}'),
+          subtitle: Text(folder.tags == "" ? '\n最終更新日: ${outputFormat.format(folder.updateAt)}':'Tag: ${folder.tags}\n最終更新日: ${outputFormat.format(folder.updateAt)}', style: TextStyle(height: 1.2)),
           isThreeLine: true,
           trailing:
           IconButton(
@@ -170,6 +170,7 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    String sortTag = "";
     final bottomNavBar = BottomAppBar(
       shape:  const CircularNotchedRectangle(),
       color: Theme.of(context).primaryColor,
@@ -191,7 +192,6 @@ class _HomeState extends State<Home> {
             IconButton(
               icon: const Icon(Icons.search),
               onPressed: () async {
-                String sortTag = "";
                 showDialog<String>(
               context: context,
               builder: (BuildContext context) =>
@@ -212,6 +212,10 @@ class _HomeState extends State<Home> {
                           var isDesc = false;
                           this._files = await db.sortFolderItems(sortTag, isDesc) as List<Folder>;
                           setState(() {});
+                          } else {
+                            sortTag = value;
+                            this._files = await db.getFolderItems()as List<Folder>;
+                            setState(() {});
                           }
                         },
                       ),
