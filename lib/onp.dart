@@ -11,7 +11,7 @@ formatDiff(prev, curr, result) {
   var minusChar = 0;
   for (var i = 0; i < result[1].length; i++) {
       if (index[1] < result[1][i][1]) {
-          string += '@|sprite|@+';
+          string += '@|sprite|@@|plusdiff|@';
           while (index[1] < result[1][i][1]) {
               string += curr[index[1]];
               index[1]++;
@@ -20,7 +20,7 @@ formatDiff(prev, curr, result) {
           string += '@|sprite|@';
       }
       if (index[0] < result[1][i][0]) {
-          string += '@|sprite|@-';
+          string += '@|sprite|@@|minusdiff|@';
           while (index[0] < result[1][i][0]) {
               string += prev[index[0]];
               index[0]++;
@@ -33,7 +33,7 @@ formatDiff(prev, curr, result) {
       index[1]++;
   }
   if (index[1] < curr.length) {
-      string += '@|sprite|@+';
+      string += '@|sprite|@@|plusdiff|@';
       while (index[1] < curr.length) {
           string += curr[index[1]];
           index[1]++;
@@ -42,7 +42,7 @@ formatDiff(prev, curr, result) {
       string += '@|sprite|@';
   }
   if (index[0] < prev.length) {
-      string += '@|sprite|@-';
+      string += '@|sprite|@@|minusdiff|@';
       while (index[0] < prev.length) {
           string += prev[index[0]];
           index[0]++;

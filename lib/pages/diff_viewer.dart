@@ -29,13 +29,17 @@ class DiffViewer extends StatelessWidget {
 
   Widget getTextWidgets(List<String> strings)
   {
-    return new Column(children: strings.map((item) => new Container(
-      height: 50,
-      width: 400,
-      color: item.length < 1 ? Colors.white : item.substring(0,1) == "+" ? Colors.green[300]: item.substring(0,1) == "-" ? Colors.red[300] : Colors.white,
-      child: Text(item),
+    return new ListView(children: strings.map((item) => new Container(
+      padding: EdgeInsets.all(16.0),
+      color: item.length < 13 ? Colors.white : item.substring(0,12) == "@|plusdiff|@" ? Colors.green[100]: item.substring(0,13) == "@|minusdiff|@" ? Colors.red[100] : Colors.white,
+      child: Text(item.length < 13 ? item : item.substring(0,12) == "@|plusdiff|@" ? item.replaceAll("@|plusdiff|@", "+ ") : item.substring(0,13) == "@|minusdiff|@" ? item.replaceAll("@|minusdiff|@", "-  ") : item, style: TextStyle(fontSize: 16, height: 1.5),),
     )).toList());
   }
+
 }
+
+
+
+
 
 
