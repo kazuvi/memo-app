@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:writerapp/db/file_db.dart';
 import 'package:writerapp/db/diff_db.dart';
-
 import 'package:async/async.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 
 
 final globalKeyGetTextField = GlobalKey();
 
+class Edit extends StatefulWidget {
+  final int? folderId;
+  Edit({Key ?key, this.folderId}) : super(key: key);
+  @override
+  _EditState createState() => _EditState();
+}
 
-class Edit extends StatelessWidget {
+var menuposition = 0;
+
+class _EditState extends State<Edit> {
   @override
   Widget build(BuildContext context) {
     final getfile= ModalRoute.of(context)!.settings.arguments as FileArguments;
@@ -52,41 +58,35 @@ class Edit extends StatelessWidget {
           appBar: AppBar(
             title: Text(getfile.title),
           ),
-          body: SingleChildScrollView(
+        body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           children: <Widget>[
-            // CustomPaint(
-            //   painter: TextUnderLinePainter(),
-            // ),
             Container(
-              child:             TextField(
+              child: TextField(
+              // autofocus: true,
               key: globalKeyGetTextField,
               keyboardType: TextInputType.multiline,
               maxLines: 30,
-                  decoration: InputDecoration(
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                        color: Colors.green,
-                    ),
-                  ),
+              style: TextStyle(
+                fontSize: 15,
+                height: 1.5,
                 ),
-              // decoration: const InputDecoration(border: InputBorder.none),
+              decoration: const InputDecoration(border: InputBorder.none),
               controller: TextEditingController(text: getfile.content),
               onChanged: (text) {
                 getfile.content = text;
-                if (text.length > 10000){
-                  Fluttertoast.showToast(msg: '一万文字を超えました　ファイルの分割をおすすめします');
-                }
               },
             )),
           ],
         ),
       ),
           backgroundColor: Colors.white.withOpacity(0.8),
-          floatingActionButton: FloatingActionButton(
-              child: const Icon(Icons.toll_rounded),
-              onPressed: () async{
+          floatingActionButton: Padding(
+            padding: const EdgeInsets.only(top: 80),
+              child: Draggable(
+                feedback: FloatingActionButton(child: Icon(Icons.drag_handle), onPressed: () {}),
+                child: FloatingActionButton(child: Icon(Icons.drag_handle), onPressed: () async{
                 var diffdb = new DiffmakeDB();
                 await diffdb.initDb();
                 Future<List> list = diffdb.commit(getfile.folderId, getfile.id, getfile.content);
@@ -104,47 +104,38 @@ class Edit extends StatelessWidget {
                     createdAt: DateTime.now()
                   )
                 );
-              }
-            ),
-            floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+              }),
+                childWhenDragging: Container(),
+                onDragEnd: (details) {
+                  var viewArea = MediaQuery.of(context).size;
+                  var keyboardArea = MediaQuery.of(context).viewInsets.bottom;
+                  // 初期値右下　0
+                  //下側処理
+                  if (details.offset.dy > viewArea.height/2 - keyboardArea/2) {
+                    // 左寄
+                    if (details.offset.dx > MediaQuery.of(context).size.width/2) {
+                      menuposition = 0;
+                      setState(() {});
+                    } else {
+                      menuposition = 1;
+                      setState(() {});
+                    }
+                  } else {
+                    // 左寄
+                    if (details.offset.dx > MediaQuery.of(context).size.width/2) {
+                      menuposition = 3;
+                      setState(() {});
+                    } else {
+                      menuposition = 2;
+                      setState(() {});
+                    }
+                  }
+                }
+              ),
+          ),
+            floatingActionButtonLocation: menuposition == 0 ? FloatingActionButtonLocation.endFloat: menuposition == 1 ? FloatingActionButtonLocation.startFloat: menuposition == 2 ? FloatingActionButtonLocation.startTop : FloatingActionButtonLocation.endTop,
         ),
       ),
     );
   }
-}
-
-class TextUnderLinePainter extends CustomPainter {
-  TextUnderLinePainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final textFieldRenderBox =
-        globalKeyGetTextField.currentContext!.findRenderObject() as RenderBox;
-
-    final ruledLineWidth = textFieldRenderBox.size.width;
-    final ruledLineSpace = textFieldRenderBox.size.height / 10000;
-    const ruledLineContentPadding = 12;
-
-    final ruledLineHeight = textFieldRenderBox.size.height;
-    final ruledLineHSpace = textFieldRenderBox.size.width / 100;
-
-    final paint = Paint()
-      ..color = Colors.grey
-      ..strokeWidth = 1;
-    for (var i = 1; i <= 10000; i++) {
-      canvas.drawLine(
-          Offset(0, ruledLineSpace * i + ruledLineContentPadding),
-          Offset(ruledLineWidth, ruledLineSpace * i + ruledLineContentPadding),
-          paint);
-    }
-
-    // for (var i = 1; i <= 100; i++) {
-    //   canvas.drawLine(
-    //       Offset(ruledLineHSpace * i + ruledLineContentPadding, 0),
-    //       Offset(ruledLineHSpace * i + ruledLineContentPadding, ruledLineHeight),
-    //       paint);
-    // }
-  }
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

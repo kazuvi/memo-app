@@ -9,25 +9,29 @@ formatDiff(prev, curr, result) {
   var string = "";
   var plusChar  = 0;
   var minusChar = 0;
+  var seq = false;
   for (var i = 0; i < result[1].length; i++) {
       if (index[1] < result[1][i][1]) {
-          string += '@|sprite|@@|plusdiff|@';
+        seq ? string += '@|plusdiff|@' : string += '@|sprite|@@|plusdiff|@';
           while (index[1] < result[1][i][1]) {
               string += curr[index[1]];
               index[1]++;
               plusChar += 1;
           }
           string += '@|sprite|@';
+          seq = true;
       }
       if (index[0] < result[1][i][0]) {
-          string += '@|sprite|@@|minusdiff|@';
+        seq ? string += '@|minusdiff|@' : string += '@|sprite|@@|minusdiff|@';
           while (index[0] < result[1][i][0]) {
               string += prev[index[0]];
               index[0]++;
               minusChar -= 1;
           }
           string += '@|sprite|@';
+          seq = true;
       }
+      seq = false;
       string += prev[result[1][i][0]];
       index[0]++;
       index[1]++;

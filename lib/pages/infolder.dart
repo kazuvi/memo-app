@@ -76,7 +76,7 @@ class _InfolderState extends State<Infolder> {
                         Fluttertoast.showToast(msg: "本文が空です");
                       } else {
                         Navigator.of(context).pop();
-                        Navigator.pushNamed(this.context, "/view",arguments: FileArguments(file.title, file.id, file.folderId, file.content));
+                        Navigator.pushNamed(this.context, "/columnview",arguments: FileArguments(file.title, file.id, file.folderId, file.content));
                       }
                     },
                   ),
