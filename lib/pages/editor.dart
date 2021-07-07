@@ -23,6 +23,7 @@ class _EditState extends State<Edit> {
     final db = new InfolderDb();
     final AsyncMemoizer _memoizer = AsyncMemoizer();
     var onScreen = true;
+    TextEditingController c= new TextEditingController(text: getfile.content);
 
     Future<bool> asyncInit() async {
       await _memoizer.runOnce(() async {
@@ -73,7 +74,7 @@ class _EditState extends State<Edit> {
                 height: 1.5,
                 ),
               decoration: const InputDecoration(border: InputBorder.none),
-              controller: TextEditingController(text: getfile.content),
+              controller: c,
               onChanged: (text) {
                 getfile.content = text;
               },
@@ -86,7 +87,22 @@ class _EditState extends State<Edit> {
             padding: const EdgeInsets.only(top: 80),
               child: Draggable(
                 feedback: FloatingActionButton(child: Icon(Icons.drag_handle), onPressed: () {}),
-                child: FloatingActionButton(child: Icon(Icons.drag_handle), onPressed: () async{
+                child: FloatingActionButton(child: Icon(Icons.drag_handle), onPressed: () {
+            showDialog<String>(
+              context: context,
+              builder: (BuildContext context) => SimpleDialog(
+                title: Text("menu"),
+                children: <Widget>[
+                  // ListTile(
+                  //   leading: const Icon(Icons.account_circle),
+                  //   title: const Text('user@example.com'),
+                  //   onTap: () => Navigator.pop(context, 'user@example.com'),
+                  // ),
+                  ListTile(
+                    leading: const Icon(Icons.edit),
+                    title: const Text('コミット'),
+                    onTap: ()
+                async{
                 var diffdb = new DiffmakeDB();
                 await diffdb.initDb();
                 Future<List> list = diffdb.commit(getfile.folderId, getfile.id, getfile.content);
@@ -104,7 +120,21 @@ class _EditState extends State<Edit> {
                     createdAt: DateTime.now()
                   )
                 );
-              }),
+              }
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.delete),
+                    title: const Text('削除'),
+                    onTap: () async{
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+
+              ),
                 childWhenDragging: Container(),
                 onDragEnd: (details) {
                   var viewArea = MediaQuery.of(context).size;
